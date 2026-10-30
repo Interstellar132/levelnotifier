@@ -1,4 +1,3 @@
-require('dotenv').config(); //remove on github
 const fs = require('fs');
 const https = require('https');
 const { Client, REST, Routes, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
