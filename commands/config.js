@@ -21,7 +21,7 @@ module.exports = {
         .addRoleOption(option =>
             option.setName('role')
             .setDescription('the role')
-            .setRequired(false)
+            .setRequired(true)
         )
         .addStringOption(option =>
             option.setName('message')
