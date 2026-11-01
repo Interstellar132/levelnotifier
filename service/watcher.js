@@ -3,6 +3,7 @@ const { EmbedBuilder } = require('discord.js');
 const userInfo = require('../models/userInfo');
 const guildConfig = require('../models/guildConfig');
 const lvlTracker = require('../models/tracker');
+const { getOfficialSong, getCustomSong, getMusicLibrarySong } = require('../service/songs');
 
 const gdendpoint = 'https://www.boomlings.com/database/getGJLevels21.php';
 
@@ -24,6 +25,8 @@ function parseLevelData(raw) {
         lvl[values[i]] = values[i + 1];
     }
 
+    const officialSong = getOfficialSong(lvl['12']);
+
     return {
         id: lvl['1'],
         name: lvl['2'],
@@ -33,33 +36,12 @@ function parseLevelData(raw) {
         likes: lvl['10'] || '0',
         starsRequested: Number(lvl['39'] || 0),
         length: Number(lvl['15'] || 0),
+        officialSongID: lvl['12'] || '0',
         customSongID: lvl['35'] || '0',
-        userCoins: Number(lvl['37'] || 0)
+        musicLibrarySongIDs: lvl['52'] || '',
+        userCoins: Number(lvl['37'] || 0),
+        officialSong
     };
-}
-
-function getSongInfo(songSection, customSongID) {
-    if (!songSection || !customSongID) {
-        return null;
-    }
-
-    const songs = songSection.split('~:~');
-
-    for (const song of songs) {
-        const values = song.split('~|~');
-        const songData = {};
-
-        for (let i = 0; i < values.length - 1; i += 2) {
-            songData[values[i]] = values[i + 1];
-        }
-
-        if (String(songData['1']) === String(customSongID)) {
-            return {
-                name: songData['2'] || 'N/A',
-                artist: songData['4'] || 'N/A'
-            };
-        }
-    } return null;
 }
 
 async function getLatestLvl(playerID) {
@@ -125,27 +107,40 @@ async function getLatestLvl(playerID) {
         lvl.creator = `Player ${playerID}`
     }
 
-    const song = getSongInfo(songParts, lvl.customSongID);
+    if (lvl.customSongID !== '0') {
+        const song = getCustomSong(songParts, lvl.customSongID);
 
-    lvl.songName = song?.name || 'N/A';
-    lvl.songArtist = song?.artist || 'N/A';
+        lvl.songName = song?.name || 'N/A';
+        lvl.songArtist = song?.artist || 'N/A'
+    } else if (lvl.musicLibrarySongIDs) {
+        const libraryIDs = lvl.musicLibrarySongIDs.split(',').map(id => id.trim()).filter(Boolean);
+
+        const song = await getMusicLibrarySong(libraryIDs[0]);
+
+        lvl.songName = song?.name || 'N/A';
+        lvl.songArtist = song?.artist || 'N/A';
+
+    } else {
+        lvl.songName = lvl.officialSong?.name || 'N/A';
+        lvl.songArtist = lvl.officialSong?.artist || 'N/A';
+    }
 
 
     return lvl;
 }
 
 const cardColor = {
-  0: { img: "https://i.ibb.co/jkLM1mhn/na.png", color: "#969796" },
-  1: { img: "https://i.ibb.co/wZdCWjWk/auto.png", color: "#f6ca62" },
-  2: { img: "https://i.ibb.co/KzrmQ0SK/easy.png", color: "#01b9ff" },
-  3: { img: "https://i.ibb.co/wZv4nk7D/normal.png", color: "#00fc05" },
-  4: { img: "https://i.ibb.co/Y47JdkK7/hard.png", color: "#fed000" },
-  5: { img: "https://i.ibb.co/Y47JdkK7/hard.png", color: "#fed000" },
-  6: { img: "https://i.ibb.co/HDdtSByP/harder.png", color: "#fe5501" },
-  7: { img: "https://i.ibb.co/HDdtSByP/harder.png", color: "#fe5501" },
-  8: { img: "https://i.ibb.co/CpCvHq1D/insane.png", color: "#fe65df" },
-  9: { img: "https://i.ibb.co/CpCvHq1D/insane.png", color: "#fe65df" },
-  10:{ img: "https://i.ibb.co/rGmc0CvW/demon.png", color: "#ff3444" },
+  0: { img: "https://cdn.discordapp.com/emojis/1566553889262542848.webp?size=96", color: "#969796" },
+  1: { img: "https://cdn.discordapp.com/emojis/1566553704545386577.webp?size=96", color: "#f6ca62" },
+  2: { img: "https://cdn.discordapp.com/emojis/1566553864667136181.webp?size=96", color: "#01b9ff" },
+  3: { img: "https://cdn.discordapp.com/emojis/1566553839539069008.webp?size=96", color: "#00fc05" },
+  4: { img: "https://cdn.discordapp.com/emojis/1566553818421006376.webp?size=96", color: "#fed000" },
+  5: { img: "https://cdn.discordapp.com/emojis/1566553818421006376.webp?size=96", color: "#fed000" },
+  6: { img: "https://cdn.discordapp.com/emojis/1566553750225686590.webp?size=96", color: "#fe5501" },
+  7: { img: "https://cdn.discordapp.com/emojis/1566553750225686590.webp?size=96", color: "#fe5501" },
+  8: { img: "https://cdn.discordapp.com/emojis/1566553233474986106.webp?size=96", color: "#fe65df" },
+  9: { img: "https://cdn.discordapp.com/emojis/1566553233474986106.webp?size=96", color: "#fe65df" },
+  10:{ img: "https://cdn.discordapp.com/emojis/1566553726590914732.webp?size=96", color: "#ff3444" },
 };
 
 const coinCount = {
