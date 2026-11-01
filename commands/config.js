@@ -74,7 +74,8 @@ module.exports = {
             if (subcommand === 'setup') {
                 const channelID = interaction.options.getChannel('channel').id;
                 const channelName = interaction.options.getChannel('channel').name;
-                const roleID = interaction.options.getRole('role').id;
+                const role = interaction.options.getRole('role');
+                const roleID = role?.id ?? null;
                 const message = interaction.options.getString('message') ?? 'There is a new level!';
 
                 await guildConfig.findOneAndUpdate(
