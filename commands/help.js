@@ -10,7 +10,7 @@ async execute(interaction) {
     .setAuthor({ name: `Help` })
     .setTitle('__Info__')
     .setThumbnail('https://i.ibb.co/tTPTSssr/questiomark.png')
-    .setDescription('Sends a notification in your discord server that lets everyone know you finally made and uploaded a new level! (pretty neat i think) __Keep in mind song libraries and official songs don\'t work atm.__')
+    .setDescription('Sends a notification in your discord server that lets everyone know you finally made and uploaded a new level! (pretty neat i think)')
     .setImage('https://i.ibb.co/t94XZsH/account.png')
     .setColor('#ffc400')
     .addFields(
