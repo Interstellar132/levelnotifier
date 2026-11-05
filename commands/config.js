@@ -36,7 +36,7 @@ module.exports = {
         subcommand
         .setName('addprofile')
         .setDescription('adds someone')
-                .addStringOption(option =>
+        .addStringOption(option =>
             option.setName('username')
             .setDescription('The Geometry Dash Username.')
             .setRequired(true)
