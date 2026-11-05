@@ -206,7 +206,7 @@ module.exports = {
 
                 await newEntry.save();
                 return interaction.reply({
-                    content: `Geometry Dash profile has been added.`,
+                    content: `**${accountName}** has been added.`,
                     ephemeral: true
                 })
             }
