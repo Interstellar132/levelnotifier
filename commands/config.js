@@ -41,16 +41,6 @@ module.exports = {
             .setDescription('The Geometry Dash Username.')
             .setRequired(true)
         )
-        .addStringOption(option =>
-            option.setName('playerid')
-            .setDescription('the player id of the geometry dash account')
-            .setRequired(false)
-        )
-        .addStringOption(option =>
-            option.setName('accountid')
-            .setDescription('the account id of the geometry dash profile. this is different from the player id.')
-            .setRequired(false)
-        )
     )
     .addSubcommand(subcommand =>
         subcommand
