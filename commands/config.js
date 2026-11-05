@@ -1,57 +1,61 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType } = require('discord.js');
 const guildConfig = require('../models/guildConfig');
 const userInfo = require('../models/userInfo');
-const lvlTracker = require('../models/tracker');
 
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('config')
-    .setDescription('set the bot up')
+    .setDescription('Server configuration.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(subcommand =>
         subcommand
         .setName('setup')
-        .setDescription('sets the announcement channel')
+        .setDescription('Set\'s this server config up.')
         .addChannelOption(option =>
             option.setName('channel')
-            .setDescription('the channel')
+            .setDescription('Where the announcement gets sent to.')
             .addChannelTypes(ChannelType.GuildText)
             .setRequired(true)
         )
         .addRoleOption(option =>
             option.setName('role')
-            .setDescription('the role')
+            .setDescription('The role that gets tagged in the announcement message.')
             .setRequired(true)
         )
         .addStringOption(option =>
             option.setName('message')
-            .setDescription('the message')
+            .setDescription('The message for the announcement.')
         )
     )
     .addSubcommand(subcommand =>
         subcommand
         .setName('view')
-        .setDescription('view the current config')
+        .setDescription('Views the current configuration for this server.')
     )
     .addSubcommand(subcommand =>
         subcommand
         .setName('addprofile')
         .setDescription('adds someone')
+                .addStringOption(option =>
+            option.setName('username')
+            .setDescription('The Geometry Dash Username.')
+            .setRequired(true)
+        )
         .addStringOption(option =>
             option.setName('playerid')
             .setDescription('the player id of the geometry dash account')
-            .setRequired(true)
+            .setRequired(false)
         )
         .addStringOption(option =>
             option.setName('accountid')
             .setDescription('the account id of the geometry dash profile. this is different from the player id.')
-            .setRequired(true)
+            .setRequired(false)
         )
     )
     .addSubcommand(subcommand =>
         subcommand
         .setName('removeprofile')
-        .setDescription('removes a profile')
+        .setDescription('Removes an account.')
         .addStringOption(option =>
             option.setName('accountid')
             .setDescription('Geometry Dash account id')
@@ -84,7 +88,7 @@ module.exports = {
                     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
                 )
                  return interaction.reply({
-                    content: `config saved`,
+                    content: `Server config settings saved.`,
                     ephemeral: true
                  })
             }
@@ -120,18 +124,99 @@ module.exports = {
             }
 
             if (subcommand === 'addprofile') {
-                const accountID = interaction.options.getString('accountid');
-                const playerID = interaction.options.getString('playerid');
+                const accToSearch = interaction.options.getString('username');
+
+                const gdusrendpoint = 'https://www.boomlings.com/database/getGJUsers20.php';
+
+                async function searchUser(username) {
+                    if (!username || !username.trim()) {
+                        throw new Error('Invalid Username field')
+                    }
+
+                    const body = new URLSearchParams({
+                        secret: 'Wmfd2893gb7',
+                        gameVersion: '22',
+                        binaryVersion: '51',
+                        gdw: '0',
+                        str: username.trim(),
+                        page: '0',
+                        total: '0'
+                    });
+
+                    const response = await fetch(gdusrendpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'User-Agent': ''
+                        },
+                        body: body.toString()
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`gd returned http ${response.status}`);
+                    }
+
+                    const resText = await response.text();
+
+                    if (!resText || resText.trim() === '-1') {
+                        return null;
+                    }
+
+                    const userData = resText.split('#')[0];
+
+                    if (!userData) {
+                        return null;
+                    }
+                    const values = userData.split(':');
+                    const user = {};
+
+                    for (let i = 0; i < values.length - 1; i += 2) {
+                        user[values[i]] = values[i + 1];
+                    }
+
+                    if (!user['1'] || !user['2']) {
+                        return null;
+                    }
+
+                    return {
+                        username: user['1'],
+                        playerID: user['2'],
+                        accountID: user['16']
+                    };
+                }
+
+                const usr = await searchUser(accToSearch);
+
+                if (!usr) {
+                    return interaction.reply({
+                        content: `Geometry Dash profile not found.`,
+                        ephemeral: true
+                    })
+                }
+
+                const accountID = usr.accountID;
+                const playerID = usr.playerID;
+                const accountName = usr.username;
+
+                const doesExist = await userInfo.findOne({ guildID, playerID });
+
+                if (doesExist) {
+                    return interaction.reply({
+                        content: `**${accountName}** has already been added.`,
+                        ephemeral: true
+                    })
+                }
 
                 const newEntry = new userInfo({
                     guildID,
                     accountID, 
-                    playerID
+                    playerID,
+                    accountName
                 })
 
                 await newEntry.save();
                 return interaction.reply({
-                    content: `Account has been added.`,
+                    content: `Geometry Dash profile has been added.`,
                     ephemeral: true
                 })
             }
@@ -141,17 +226,16 @@ module.exports = {
             const playerID = interaction.options.getString('playerid');
 
             const removeAcc = await userInfo.findOneAndDelete({ guildID, accountID, playerID });
-            const removeLvls = await lvlTracker.findOneAndDelete({ playerID });
 
-            if (!removeAcc && !removeLvls) {
+            if (!removeAcc) {
                 return interaction.reply({
-                    content: `There is nothing associated with the details you provided.`,
+                    content: `No account found.`,
                     ephemeral: true
                 });
             }
 
             return interaction.reply({
-                content: `Account has been removed`,
+                content: `Account has been removed.`,
                 ephemeral: true
             });
         }
@@ -159,7 +243,7 @@ module.exports = {
         } catch (err) {
             console.error('there was an error with config setup', err);
             return interaction.reply({
-                content: `there was an error with setup`,
+                content: `Failed configuration.`,
                 ephemeral: true
             })
         }
