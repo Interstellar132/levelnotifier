@@ -9,7 +9,7 @@ const gdendpoint = 'https://www.boomlings.com/database/getGJLevels21.php';
 
 const checkInterval = 5 * 60 * 1000;
 
-const reqDelay = 650;
+const reqDelay = 5000;
 
 let watStart = false;
 
