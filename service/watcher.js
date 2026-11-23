@@ -207,7 +207,7 @@ async function sendLvl(client, playerID, lvl) {
                     { name: `${lvlType}`, value: lvl.starsRequested > 0 ? `${lvl.starsRequested}` : 'N/A', inline: false },
                     { name: '<:time:1565841217340571870> __Length__', value: String(lvlLength), inline: false },
                     { name: '', value: '----------------------------', inline: false },
-                    { name: `Coins: ${coins}`, value: `:musical_note: __${lvl.songName}__ by __${lvl.songArtist}__`, inline: false }
+                    { name: `Coins: ${coins}`, value: `:musical_note: __${lvl.songName}__ by ${lvl.songArtist}`, inline: false }
                 )
                 .setTimestamp()
                 .setFooter({
