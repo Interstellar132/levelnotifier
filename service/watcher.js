@@ -150,6 +150,15 @@ const coinCount = {
     3: '<:silvercoin:1565785503771402310><:silvercoin:1565785503771402310><:silvercoin:1565785503771402310>'
 }
 
+const levelTypeReq = {
+    0: '<:star:1565838558399307806> __Stars Requested__',
+    1: '<:star:1565838558399307806> __Stars Requested__',
+    2: '<:star:1565838558399307806> __Stars Requested__',
+    3: '<:star:1565838558399307806> __Stars Requested__',
+    4: '<:star:1565838558399307806> __Stars Requested__',
+    5: '<:moon:1565838579660488755> __Moons Requested__'
+}
+
 async function sendLvl(client, playerID, lvl) {
     const lvlLengthToName = {
     0: 'Tiny',
@@ -163,6 +172,7 @@ async function sendLvl(client, playerID, lvl) {
     const lvlLength = lvlLengthToName[lvl.length] ?? 'N/A';
     const diff = cardColor[lvl.starsRequested] ?? cardColor[0];
     const coins = coinCount[lvl.userCoins] ?? coinCount[0];
+    const lvlType = levelTypeReq[lvl.length] ?? levelTypeReq[0];
     const subbies = await userInfo
         .find({ playerID: String(playerID) })
         .select('guildID')
@@ -181,7 +191,7 @@ async function sendLvl(client, playerID, lvl) {
             const channel = await client.channels.fetch(config.channelID);
 
             if (!channel || !channel.isTextBased() || typeof channel.send !== 'function') {
-                console.log(`Invalid announcement channel for ${config.guildID}`);
+                console.log(`Invalid notifier channel for ${config.guildID}`);
                 continue;
             }
 
@@ -194,10 +204,10 @@ async function sendLvl(client, playerID, lvl) {
                 .addFields(
                     { name: '', value: '----------------------------', inline: false },
                     { name: '<:play:1565847211151990925> __Level ID__', value: String(lvl.id), inline: false },
-                    { name: '<:star:1565838558399307806> __Stars/Moons Requested__ <:moon:1565838579660488755>', value: lvl.starsRequested > 0 ? `${lvl.starsRequested}` : 'N/A', inline: false },
-                    { name: '<:time:1565841217340571870> __Level Length__', value: String(lvlLength), inline: false },
+                    { name: `${lvlType}`, value: lvl.starsRequested > 0 ? `${lvl.starsRequested}` : 'N/A', inline: false },
+                    { name: '<:time:1565841217340571870> __Length__', value: String(lvlLength), inline: false },
                     { name: '', value: '----------------------------', inline: false },
-                    { name: `Coins: ${coins}`, value: `:musical_note: __${lvl.songName}__ by ${lvl.songArtist}`, inline: false }
+                    { name: `Coins: ${coins}`, value: `:musical_note: __${lvl.songName}__ by __${lvl.songArtist}__`, inline: false }
                 )
                 .setTimestamp()
                 .setFooter({
