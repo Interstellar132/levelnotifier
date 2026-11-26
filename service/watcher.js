@@ -196,7 +196,7 @@ async function sendLvl(client, playerID, lvl) {
             }
 
             const lvlCard = new EmbedBuilder()
-            .setAuthor({ name: 'New Level!', iconURL: 'https://cdn.discordapp.com/emojis/740636765882417164.webp?size=96' })
+            .setAuthor({ name: 'New Level!', iconURL: 'https://cdn.discordapp.com/emojis/1575405646948606013.webp?size=96' })
                 .setColor(diff.color)
                 .setTitle(`**${lvl.name}** by **${lvl.creator}**`)
                 .setThumbnail(diff.img)
