@@ -15,6 +15,7 @@ const client = new Client({
 
 const token = process.env.discord_token;
 const clientID = process.env.clientID;
+const guildID = process.env.devServer;
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
