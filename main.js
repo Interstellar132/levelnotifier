@@ -17,15 +17,16 @@ const token = process.env.discord_token;
 const clientID = process.env.clientID;
 const guildID = process.env.devServer;
 
-const commands = [];
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     if (command.data && typeof command.data.toJSON === 'function') {
-        commands.push(command.data.toJSON());
+        if (file === 'dev.js') {
+            guildCommands.push(command.data.toJSON());
+        } else {
+            globalCommands.push(command.data.toJSON());
+        }
     } else {
-        console.warn(`${file} does not have valid builder data`);
+        console.warn(`${file} invalid builder data`)
     }
 }
 
@@ -33,10 +34,14 @@ for (const file of commandFiles) {
     const rest = new REST({ version: '10' }).setToken(token);
 
     try {
-        console.log(`started refreshing ${commands.length} commands`);
+        console.log(`started refreshing ${globalCommands.length} Global commands and ${guildCommands.length} Guild commands.`);
 
         await rest.put(Routes.applicationCommands(clientID),
-        { body: commands });
+        { body: globalCommands });
+
+        await rest.put(Routes.applicationGuildCommands(clientID, guildID),
+            { body: guildCommands });
+
         console.log(`reloaded commands`);
     } catch (error) {
         console.error(error);
