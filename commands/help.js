@@ -11,7 +11,7 @@ async execute(interaction) {
     .setTitle('__Info__')
     .setThumbnail('https://i.ibb.co/tTPTSssr/questiomark.png')
     .setDescription('Sends a notification in your discord server that lets everyone know you finally made and uploaded a new level! (pretty neat i think)')
-    .setImage('https://i.ibb.co/t94XZsH/account.png')
+    .setImage('https://cdn.discordapp.com/attachments/740038789812191292/1569517642925219891/levelnotifier.gif?ex=6af3beb6&is=6af26d36&hm=6f58309b378ac3fefb07d7fc06321d82a49cf45548c09ee666c8abb520e13758&')
     .setColor('#ffc400')
     .addFields(
         { name: '**Config**', value: "----------------", inline: false },
@@ -19,11 +19,14 @@ async execute(interaction) {
         { name: '``role``', value: "Sets the role for the announcement.", inline: true },
         { name: '``message``', value: "Sets a custom message.", inline: true },
         { name: 'view', value: "View the current configuration for this server.", inline: true },
-        { name: 'addprofile', value: "Adds a GD profile to check.", inline: true },
-        { name: 'removeprofile', value: "Removes a GD profile from the check", inline: true },
+        { name: 'addprofile', value: "Adds a Geometry Dash profile", inline: true },
+        { name: 'removeprofile', value: "Removes a Geometry Dash profile.", inline: true },
+        { name: '**Users**', value: "----------------", inline: false },
+        { name: '``/listusers all``', value: "Lists every profile for a server", inline: true },
+        { name: '``/listusers {user}``', value: "Lists a single profile.", inline: true },
         { name: '', value: "", inline: false },
         { name: '', value: "", inline: false },
-        { name: '', value: 'View the bottom image to see where you can retrieve the account and player IDs for a Geometry Dash account', inline: false }
+        { name: '', value: 'Below shows how to add a user to the bot.', inline: false }
     )
     .setFooter({
         text: `Contact Interstellar for any questions or suggestions: interstellar_ca`
