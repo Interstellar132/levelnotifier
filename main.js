@@ -17,6 +17,10 @@ const token = process.env.discord_token;
 const clientID = process.env.clientID;
 const guildID = process.env.devServer;
 
+const globalCommands = [];
+const guildCommands = [];
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     if (command.data && typeof command.data.toJSON === 'function') {
